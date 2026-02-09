@@ -3,16 +3,13 @@ from tqdm import tqdm
 import json
 
 #yandex API
-YANDEX_TOKEN = ''
 YANDEX_BASE_URL = 'https://cloud-api.yandex.net'
 YANDEX_FOLDER = 'PY-144'
-yandex_headers = {
-    'Authorization': f'OAuth {YANDEX_TOKEN}'
-}
+
 yandex_new_folder = f'{YANDEX_BASE_URL}/v1/disk/resources'
 yandex_save_file = f'{YANDEX_BASE_URL}/v1/disk/resources/upload'
 
-def yandex_create_folder(path):
+def yandex_create_folder(path, yandex_headers):
     response = requests.put(
         yandex_new_folder,
         headers=yandex_headers,
@@ -23,13 +20,12 @@ def yandex_create_folder(path):
     if response.status_code not in (201, 409):
         raise RuntimeError(f'Не удалось создать папку {path}')
 
-def yandex_upload_file(url, disk_path, image_text):
+def yandex_upload_file(url, disk_path, image_text, yandex_headers):
     response = requests.post(
         yandex_save_file,
         params = {'path': disk_path, 'url' : url},
         headers=yandex_headers
     )
-    #upload_link = response.json()['href']
 
     total_size = int(response.headers.get('content-length', 0))
     print("Размер передаваемого файла: ", total_size, " байт")
@@ -46,7 +42,7 @@ def yandex_upload_file(url, disk_path, image_text):
     else:
         print(f'Файл {disk_path} не загружен')
 
-#
+#cataas API
 CATAAS_BASE_URL = 'https://cataas.com'
 
 def cataas_create_image(image_text):
@@ -83,7 +79,9 @@ def load_image_to_local_disk(image_link):
 
 
 def main():
-    YANDEX_TOKEN = input('Введите свой токен: ')
+    yandex_token = input('Введите свой токен: ')
+    yandex_headers = {'Authorization': f'OAuth {yandex_token}'}
+
     image_text = input('Привет! Введите волшебное слово для формирования картинки с котиком: ')
     image_link = cataas_create_image(image_text)
 
@@ -92,8 +90,8 @@ def main():
     #stop
 
     disk_path = f'{YANDEX_FOLDER}/{image_text}.jpg'
-    yandex_create_folder(YANDEX_FOLDER)
-    yandex_upload_file(url=image_link, disk_path=disk_path, image_text=image_text)
+    yandex_create_folder(YANDEX_FOLDER, yandex_headers=yandex_headers)
+    yandex_upload_file(url=image_link, disk_path=disk_path, image_text=image_text, yandex_headers=yandex_headers)
     #stop
 
 if __name__ == '__main__':
