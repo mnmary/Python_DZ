@@ -1,5 +1,6 @@
 import requests
 from tqdm import tqdm
+import json
 
 #yandex API
 YANDEX_TOKEN = ''
@@ -22,13 +23,21 @@ def yandex_create_folder(path):
     if response.status_code not in (201, 409):
         raise RuntimeError(f'Не удалось создать папку {path}')
 
-def yandex_upload_file(url, disk_path):
+def yandex_upload_file(url, disk_path, image_text):
     response = requests.post(
         yandex_save_file,
         params = {'path': disk_path, 'url' : url},
         headers=yandex_headers
     )
     #upload_link = response.json()['href']
+
+    total_size = int(response.headers.get('content-length', 0))
+    print("Размер передаваемого файла: ", total_size, " байт")
+    file_info = dict(response.headers)
+    print("Принятый заголовок ответа: ", file_info.items())
+
+    with open(f"{image_text}.json", "w") as f:
+        json.dump(file_info, f)
 
     print("Загрузка файла на Яндекс: ",response.status_code)
     print(response.json())
@@ -74,6 +83,7 @@ def load_image_to_local_disk(image_link):
 
 
 def main():
+    YANDEX_TOKEN = input('Введите свой токен: ')
     image_text = input('Привет! Введите волшебное слово для формирования картинки с котиком: ')
     image_link = cataas_create_image(image_text)
 
@@ -83,7 +93,7 @@ def main():
 
     disk_path = f'{YANDEX_FOLDER}/{image_text}.jpg'
     yandex_create_folder(YANDEX_FOLDER)
-    yandex_upload_file(url=image_link, disk_path=disk_path)
+    yandex_upload_file(url=image_link, disk_path=disk_path, image_text=image_text)
     #stop
 
 if __name__ == '__main__':
