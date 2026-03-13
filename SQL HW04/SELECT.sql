@@ -17,7 +17,7 @@ SELECT name
 
 SELECT name 
 	FROM public.track
-	WHERE (name like '%my%' or name like '%мой%' or name like '%My%' or name like '%Мой%'); 
+	WHERE (name ilike 'my %' or name ilike 'мой %' or name ilike '% my' or name ilike '% мой' or name ilike '% my %' or name ilike '% мой %' or name ilike 'my' or name ilike 'мой'); 
 
 -- ----------
 
@@ -26,11 +26,10 @@ FROM public.genre_artist AS genre_artist
 LEFT JOIN public.genre AS genre ON genre.id = genre_artist.genre_id
 GROUP BY genre.name;
 
-SELECT album.name, COUNT(track.id)
+SELECT COUNT(track.id)
 FROM public.track as track
 LEFT JOIN public.album as album ON album.id = track.album_id
-WHERE album.yearof >= 2019 AND album.yearof<2021
-GROUP BY album.name;
+WHERE album.yearof between 2019 and 2020;
 
 
 SELECT album.name, round(AVG(track.timeof)/60,2) as timeof_in
@@ -69,7 +68,7 @@ SELECT * FROM
 	LEFT JOIN public.artist as artist ON artist.id = genre_artist.artist_id
 	LEFT JOIN public.artist_album as artist_album ON artist_album.artist_id = artist.id
 	LEFT JOIN public.album as album ON album.id = artist_album.album_id
-	GROUp BY album.name
+	GROUp BY album.name, genre_artist.artist_id
 	) as genreList
 WHERE (genreList.genreCnt) > 1;
 
@@ -86,21 +85,16 @@ WHERE track.timeof =
 	SELECT min(timeof) FROM public.track
 	);
 
-SELECT DISTINCT album.name FROM public.album
-LEFT JOIN public.track on track.album_id = album.id
-WHERE track.album_id IN 
+SELECT album.name 
+FROM public.album
+LEFT JOIN public.track on track.album_id = album.id	
+GROUP BY album.id 
+HAVING COUNT(album_id) = 
 	(
-    SELECT album_id 
-	FROM public.track
+    SELECT COUNT(id) as count FROM public.track 
     GROUP BY album_id
-    HAVING count(album_id) = 
-		(
-         SELECT count(id)
-         FROM public.track
-         GROUP BY album_id
-         ORDER BY count
-         LIMIT 1
-		)
-	)
+    ORDER BY count 
+    LIMIT 1
+	);
 
 
