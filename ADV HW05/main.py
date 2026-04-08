@@ -40,7 +40,7 @@ def main():
         else:
             result[key] = new_contact
 
-    normalize_contacts = header + list(result.values())
+    normalize_contacts = [header] + list(result.values())
 
     with open("phonebook.csv", "w", encoding="utf-8", newline='') as f:
         writer = csv.writer(f)
