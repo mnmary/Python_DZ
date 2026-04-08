@@ -15,6 +15,7 @@ def main():
         rows = csv.reader(f, delimiter=",")
         contacts_list = list(rows)
 
+    header = contacts_list[0]
     contacts = contacts_list[1:]
 
     PHONE_PATTERN = r"(\+7|8)[\s(]*(\d{3})[)\s]*[\s-]*(\d{3})[\s-]*(\d{2})[\s-]*(\d{2})[\s(]*(доб.)*\s*(\d{4})*"
@@ -39,7 +40,7 @@ def main():
         else:
             result[key] = new_contact
 
-    normalize_contacts = list(result.values())
+    normalize_contacts = header + list(result.values())
 
     with open("phonebook.csv", "w", encoding="utf-8", newline='') as f:
         writer = csv.writer(f)
