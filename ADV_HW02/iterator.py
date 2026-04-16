@@ -45,7 +45,7 @@ class FlatIterator:
                 self._stack.append(iter(item))  # если это список - кладем его итератор в стек
                 continue
 
-            return item # возвращаем итератор и уходим до следующего шага
+            return item # возвращаем элемент и уходим до следующего шага
 
         raise StopIteration
 
